@@ -19,7 +19,6 @@ struct LoginView: View {
                     .bold()
                 
                 Spacer()
-                
                 Image(systemName: "line.3.horizontal")
                     .font(.title2)
                     .foregroundColor(.blue)
@@ -28,52 +27,97 @@ struct LoginView: View {
             
             Spacer()
             
-            Button(action: {
-                viewModel.authenticateWithFaceID()
-            }) {
-                Image(systemName: "faceid")
-                    .resizable()
-                    .frame(width: 80, height: 80)
-                    .foregroundColor(.blue)
-            }
-            
-            Spacer()
-            
-            VStack(spacing: 8) {
-                Text(viewModel.getGreetingMessage())
-                    .font(.title2)
-                    .foregroundColor(.gray)
+            // Returning user content
+            if viewModel.currentState == .returningUser {
                 
-                Text("Luis Angel")
-                    .font(.largeTitle)
-                    .bold()
-                    .foregroundColor(.secondary)
+                // Returning user interface
+                VStack(spacing: 8) {
+                    Text(viewModel.getGreetingMessage())
+                        .font(.title2)
+                        .foregroundColor(.gray)
+                    
+                    Text("Luis Angel")
+                        .font(.largeTitle)
+                        .bold()
+                        .foregroundColor(.secondary)
+                    
+                }
                 
+                Spacer()
+                
+                Button(action: {
+                    viewModel.authenticateWithFaceID()
+                }) {
+                    Image(systemName: "faceid")
+                        .resizable()
+                        .frame(width: 80, height: 80)
+                        .foregroundColor(.blue)
+                }
+                
+                Spacer()
+                
+                Button(action: {
+                    // New user or logged out
+                    viewModel.currentState = .newUser
+                }) {
+                    Text("Login with password")
+                        .font(.headline)
+                        .foregroundColor(.blue)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            Capsule()
+                                .stroke(Color.blue, lineWidth: 1.5))
+                }
+                .padding(.horizontal, 30)
+                
+            } else {
+                // New user interface
+                VStack(spacing: 20) {
+                    Text("Welcome to Aurum Bank")
+                        .font(.title2)
+                        .bold()
+                        .foregroundColor(.blue)
+                    
+                    TextField("Email", text: $viewModel.email)
+                        .textFieldStyle(.roundedBorder)
+                        .autocapitalization(.none)
+                        .keyboardType(.emailAddress)
+                    
+                    SecureField("Password", text: $viewModel.password)
+                        .textFieldStyle(.roundedBorder)
+                    
+                    Button(action: {
+                        viewModel.login()
+                    }) {
+                        Text("Sign In")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                    }
+                    
+                    Button(action: {
+                        viewModel.currentState = .returningUser
+                    }) {
+                        Text("Cancel")
+                            .foregroundColor(.gray)
+                    }
+                }
+                
+                .padding(.horizontal, 30)
             }
             
             Spacer()
             
-            Button(action: {
-                print("Password button tapped")
-            }) {
-                Text("Login with password")
-                    .font(.headline)
-                    .foregroundColor(.blue)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(
-                        Capsule()
-                            .stroke(Color.blue, lineWidth: 1.5)
-                    )
-            }
-            .padding(.horizontal, 30)
-            
-            Spacer()
         }
         .padding(.bottom)
     }
-}
     
-    #Preview {
-        LoginView()
-    }
+}
+
+#Preview {
+    LoginView()
+}

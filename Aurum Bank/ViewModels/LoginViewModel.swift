@@ -9,6 +9,11 @@ import SwiftUI
 import Combine
 import LocalAuthentication
 
+enum AuthState {
+    case returningUser
+    case newUser
+}
+
 class LoginViewModel: ObservableObject {
     
     @Published var email = ""
@@ -16,6 +21,7 @@ class LoginViewModel: ObservableObject {
     
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    @Published var currentState: AuthState = .returningUser
     
     func login() {
         guard !email.isEmpty, !password.isEmpty else {
