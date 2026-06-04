@@ -12,6 +12,7 @@ import LocalAuthentication
 enum AuthState {
     case returningUser
     case newUser
+    case authenticated
 }
 
 class LoginViewModel: ObservableObject {
@@ -23,16 +24,36 @@ class LoginViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var currentState: AuthState = .returningUser
     
-    func login() {
+    func login() async {
         guard !email.isEmpty, !password.isEmpty else {
-            self.errorMessage = "Please enter your email and password."
+//            self.errorMessage = "Please enter your email and password."
+//            return
+            await MainActor.run {
+                self.errorMessage = "Please enter your email and password."
+            }
             return
         }
         
-        self.isLoading = true
-        self.errorMessage = nil
+        await MainActor.run {
+            self.isLoading = true
+            self.errorMessage = nil
+        }
         
-        print ("Logging in with \(email)")
+        print ("Sending server request to server for \(email)")
+        
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
+        
+        await MainActor.run {
+            self.isLoading = false
+            
+            if email.lowercased() == "luis@aurum.com" && password == "password123" {
+                print("Server returned HTTP 200: Success!")
+                self.currentState = .authenticated
+            } else {
+                print("Server returned HTTP 401: Unauthorized")
+                self.errorMessage = "Invalid email or password. Try Again."
+            }
+        }
     }
     
     func authenticateWithFaceID() {
@@ -47,6 +68,7 @@ class LoginViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     if success {
                         print("Face ID Passed! Navigating to dashboard...")
+                        self.currentState = .authenticated
                     } else {
                         self.errorMessage = authenticateError?.localizedDescription ?? "Biometric authentication failed."
                     }
